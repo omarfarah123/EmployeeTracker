@@ -13,9 +13,10 @@ const db = mysql.createConnection(
     },
 );
 
-const choices = ['view all departments', 'view all roles', 'view all employees', 'add a department', 'add a role', 'add an employee', 'update an employee role', 'Update employee managers']
+const choices = ['view all departments', 'view all roles', 'view all employees', 'add a department', 'add a role', 'add an employee', 'update an employee role']
 
 function main(){
+    
     inquirer
   .prompt([
     {
@@ -101,6 +102,7 @@ function main(){
                
            })
       } else if(response.options === "add an employee"){
+        
         inquirer
             .prompt([
                     {
@@ -166,7 +168,6 @@ function main(){
                              addAnEmployee(response.first_name.toUpperCase(), response.last_name.toUpperCase(), roleId, managerId)
                           });
                     }
-                    
 
                   });
 
@@ -174,11 +175,46 @@ function main(){
               console.log(managerId);
               addAnEmployee(response.first_name.toUpperCase(), response.last_name.toUpperCase(), );
             })
-      } 
+      } else if(response.options === "update an employee role"){
+        
+        inquirer
+            .prompt([
+                {
+                    type: 'list',
+                    name: 'employee',
+                    message: 'Choose an employee',
+                    choices: employeeNames()
+                },
+                {
+                    type : "list",
+                    name : "manager",
+                    message : "update manager for the employee",
+                    choices: employeeNames()
+                },
+            ])
+            .then((response) => {
+                const sql = `SELECT id FROM EMPLOYEES WHERE CONCAT(first_name, ' ',last_name) = ${response.employee}`
+                db.query(sql, (err, rows) => {
+                    if(err){
+                        console.log(chalk.red(err.message))
+                    } else {
+                        let employeeId = rows[0].id;
+                        db.query(sql, (err, rows) => {
+                            if(err){
+                                console.log(chalk.red(err.message));
+                            } else {
+                                let updatedManagerId = rows[0].id; 
+                                employeeRoles(employeeId, updatedManagerId);
+                            }
+                        })
+                    }
+                })
+            })
+      }
     });
 
 }
-main();
+
 
 
 
@@ -292,9 +328,20 @@ function roleTitles(){
       return roleTitles;
 }
 
+function employeeRoles(employeeId, roleId){
+    const sql = `UPDATE EMPLOYEES SET role_id = ${roleId} WHERE id = ${employeeId};`
+    db.query(sql, (err, rows) => {
+        if(err){
+            console.log(chalk.red(err.message));
+        } else {
+            console.log("Updated Role")
+        }
+    })
+}
 
 
-function employeeNames(){
+
+const employeeNames = () => {
     const sql = "SELECT * FROM EMPLOYEES;"
     const employeeNames = [];
     db.query(sql, (err, rows) => {
@@ -311,19 +358,12 @@ function employeeNames(){
     return employeeNames;
 }
 
-function updateEmployeeManager(employeeId, managerID){
-    const sql = `UPDATE EMPLOYEES SET manager_id = ${managerId} WHERE id = ${employeeID};`
-    db.query(sql, (err, status) => {
-        if(err){
-            console.log(chalk.red(`Failed to update manager`));
-        } else {
-            console.log("Manager Update Succesfull")
-        }
-    })
-}
-
 
 
 function containsAnyLetters(str) {
     return /[a-zA-Z]/.test(str);
   }
+
+
+
+  main();

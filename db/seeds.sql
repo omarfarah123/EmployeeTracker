@@ -40,7 +40,7 @@ VALUES ('MIKE', 'JONES', 1, null),
     ('HENREY', 'HENRYSON', 5, 19),
     ('MANNING', 'PEYTON', 6, null),
     ('EDDIE', 'JONES', 6, 23),
-    ('CONNOR', 'STACKHOUSE', 6, 23)
+    ('CONNOR', 'STACKHOUSE', 6, 23),
     ('PATTY', 'BROWN', 4, null);
 
 

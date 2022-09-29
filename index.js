@@ -104,7 +104,6 @@ function main(){
                
            })
       } else if(response.options === "add an employee"){
-        console.log(employeeNames())
         inquirer
             .prompt([
                     {
@@ -174,9 +173,6 @@ function main(){
 
                   });
 
-              console.log(roleId);
-              console.log(managerId);
-              addAnEmployee(response.first_name.toUpperCase(), response.last_name.toUpperCase(), );
             })
        } else if (response.options === "update employee role"){
         

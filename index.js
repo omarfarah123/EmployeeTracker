@@ -13,7 +13,7 @@ const db = mysql.createConnection(
     },
 );
 
-const choices = ['view all departments', 'view all roles', 'view all employees', 'add a department', 'add a role', 'add an employee', 'update employee role', 'update employee manager']
+const choices = ['view all departments', 'view all roles', 'view all employees', 'add a department', 'add a role', 'add an employee', 'update employee role', 'update employee manager', 'quit']
 //Main function for inquirer prompt execution
 function main(){
     inquirer
@@ -281,6 +281,8 @@ function main(){
                 })
                 }
             })
+      } else if(response.options === "quit"){
+        process.exit();
       }
     });
 

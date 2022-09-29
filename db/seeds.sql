@@ -20,17 +20,17 @@ VALUES ('MIKE', 'JONES', 1, null),
     ('JOE', 'JOHNSON', 1, 1),
     ('KEVIN', 'JONES', 1, 1),
     ('HOWARD', 'TOM', 1, 1),
-    ('NATHANIEL', 'WAGNER', 2, null),
-    ('MAXWELL', 'RUSSEL', 2, 5),
+    ('PAT', 'WAGNER', 2, null),
+    ('KATE', 'RUSSEL', 2, 5),
     ('ADEN', 'PHILLIPS', 2, 5),
     ('SKY', 'MENDOZA', 2, 5),
     ('ABU', 'PHILLIPS', 2, 5),
     ('ABU', 'DRONE', 2, 5),
     ('MUHAMMAD', 'FARAH', 3, null),
-    ('ISA', 'YUSUF', 3, 11),
+    ('AMBER', 'YOLK', 3, 11),
     ('JAMA', 'MUSE', 3, 11),
-    ('KYRIE', 'BRAD', 4, null),
-    ('OCTAVIUS', 'KEEYS', 4, 14),
+    ('KYRIE', 'SIMMONS', 4, null),
+    ('JA', 'KEEYS', 4, 14),
     ('LEO', 'SIMPSON', 4, 14),
     ('KOBE', 'WHITE', 4, 14),
     ('JAMES', 'JOHNSON', 4, 14),
@@ -40,7 +40,8 @@ VALUES ('MIKE', 'JONES', 1, null),
     ('HENREY', 'HENRYSON', 5, 19),
     ('MANNING', 'PEYTON', 6, null),
     ('EDDIE', 'JONES', 6, 23),
-    ('FOWAS', 'DRAME', 6, 23);
+    ('CONNOR', 'STACKHOUSE', 6, 23)
+    ('PATTY', 'BROWN', 4, null);
 
 
 

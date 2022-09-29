@@ -13,10 +13,9 @@ const db = mysql.createConnection(
     },
 );
 
-const choices = ['view all departments', 'view all roles', 'view all employees', 'add a department', 'add a role', 'add an employee', 'update an employee role']
-
+const choices = ['view all departments', 'view all roles', 'view all employees', 'add a department', 'add a role', 'add an employee', 'update employee role', 'update employee manager']
+//Main function for inquirer prompt execution
 function main(){
-    
     inquirer
   .prompt([
     {
@@ -59,6 +58,7 @@ function main(){
                    type: 'input',
                    name: 'title',
                    message: 'Enter a title for the role',
+                   //Incase user enters garbage like blank title
                    validate: function(title){
                     if(title.trim().length === 0){
                         console.log(chalk.red(" Please enter a valid title"));
@@ -71,12 +71,14 @@ function main(){
                 type: 'list',
                 name: 'department',
                 message: 'choose a department for the role',
+                //Returns array of all the departments
                 choices: departmentTitles(),
             },
             {
                 type: 'input',
                 name: 'salary',
                 message: 'Enter a salary for the role',
+                //Validation for salary incase user enters garbage salary
                 validate: function(salary){
                     if(containsAnyLetters(Number(salary))){
                         console.log(chalk.red(" Please enter a number")); 
@@ -102,7 +104,7 @@ function main(){
                
            })
       } else if(response.options === "add an employee"){
-        
+        console.log(employeeNames())
         inquirer
             .prompt([
                     {
@@ -140,7 +142,8 @@ function main(){
                         name: 'manager',
                         message: 'Choose a manager for the employee',
                         choices: employeeNames()
-                    },
+                    }
+                
             ])
             .then((response) => {
                
@@ -175,40 +178,108 @@ function main(){
               console.log(managerId);
               addAnEmployee(response.first_name.toUpperCase(), response.last_name.toUpperCase(), );
             })
-      } else if(response.options === "update an employee role"){
+       } else if (response.options === "update employee role"){
         
-        inquirer
-            .prompt([
-                {
-                    type: 'list',
-                    name: 'employee',
-                    message: 'Choose an employee',
-                    choices: employeeNames()
-                },
-                {
-                    type : "list",
-                    name : "manager",
-                    message : "update manager for the employee",
-                    choices: employeeNames()
-                },
-            ])
-            .then((response) => {
-                const sql = `SELECT id FROM EMPLOYEES WHERE CONCAT(first_name, ' ',last_name) = ${response.employee}`
-                db.query(sql, (err, rows) => {
-                    if(err){
-                        console.log(chalk.red(err.message))
+            inquirer
+                .prompt([
+                    {
+                        type: 'list',
+                        name: 'reason',
+                        message: "what is the reason for the employee role change?",
+                        choices: ["promotion", "career change", "demotion", "personal"]
+                    },
+                    {
+                        type : 'list',
+                        name : 'employee',
+                        message : "choose an employee",
+                        choices: employeeNames()
+                    },
+                    {
+                        type: "list",
+                        name: 'roles',
+                        message: 'choose a role',
+                        choices: roleTitles()
+                    }
+                ])
+                .then((response) => {
+                    //If user chooses No Manager option we will deny this data from being sent to sql query
+                    if(response.employee === 'No Manager'){
+                        console.log(chalk.red("No Manager option not available please choose an employee name"))
+                        main()
                     } else {
-                        let employeeId = rows[0].id;
+                        const sql = `SELECT id FROM EMPLOYEES WHERE CONCAT(first_name, ' ',last_name) = '${response.employee}'`
                         db.query(sql, (err, rows) => {
                             if(err){
-                                console.log(chalk.red(err.message));
+                                console.log(chalk.red(err.message))
                             } else {
-                                let updatedManagerId = rows[0].id; 
-                                employeeRoles(employeeId, updatedManagerId);
+                                const employeeId = rows[0].id;
+                              
+                                const sql2 = `SELECT id FROM ROLES WHERE title = '${response.roles}'`
+                                db.query(sql2, (err, rows) => {
+                                    if(err){
+                                        console.log(chalk.red(err.message));
+                                    } else {
+                                        const roleId = rows[0].id;
+                                        
+                                        employeeRoles(employeeId, roleId);
+                                    }
+                                    
+                                })
+                                
                             }
                         })
                     }
                 })
+       } else if(response.options === "update employee manager"){
+        inquirer
+            .prompt([
+                {
+                    type : 'list',
+                    name : 'reason',
+                    message : "what is the reason for the manager update?",
+                    choices: ["communication", "deparment change", "location change", "personal"]
+                },
+                {
+                    type : 'list',
+                    name : 'employee',
+                    message : "choose employee for the manager update",
+                    choices: employeeNames()
+                },
+                {
+                    type : 'list',
+                    name : "updateManager",
+                    message : "update manager for the employee select No Manager if you want to remove manager",
+                    choices: employeeNames()
+                },
+            ])
+            .then((response) => {
+                if(response.employee === 'No Manager'){
+                    console.log(chalk.red("No Manager choice not valid for this question. Please choose an employee"))
+                    main()
+                } else {
+                    const sql = `SELECT id FROM EMPLOYEES WHERE CONCAT(first_name, ' ',last_name) = '${response.employee}'`
+                db.query(sql, (err, rows) => {
+                    if(err){
+                        console.log(chalk.red(err.message))
+                    } else {
+                        const employeeId = rows[0].id;
+                        if(response.updateManager === "No Manager"){
+                            employeeManagers(employeeId, null);
+                        } else {
+                            const sql2 = `SELECT id FROM EMPLOYEES WHERE CONCAT(first_name, ' ',last_name) = '${response.updateManager}'`
+                        db.query(sql2, (err, rows) => {
+                            if(err){
+                                console.log(chalk.red(err.message));
+                            } else {
+                                const updatedManagerId = rows[0].id;
+                                employeeManagers(employeeId, updatedManagerId);
+                            }
+                            
+                        })
+                        }
+                    }
+                })
+                }
             })
       }
     });
@@ -269,7 +340,6 @@ function addADepartment(department){
 }
 
 function addARole(title, department_id, salary){
-       
             const sql = `INSERT INTO ROLES (title, department_id, salary) VALUES ('${title.toUpperCase()}', ${department_id}, ${salary});`
         db.query(sql, (err, rows) => {
             if (err) {
@@ -279,7 +349,6 @@ function addARole(title, department_id, salary){
             console.log(chalk.green(`Succesfully added ${title} to Roles`));
             main();
           });
-        
 }
 
 function addAnEmployee(first_name, last_name, role_id, manager_id){
@@ -328,15 +397,29 @@ function roleTitles(){
       return roleTitles;
 }
 
-function employeeRoles(employeeId, roleId){
+const employeeRoles = (employeeId, roleId) => {
     const sql = `UPDATE EMPLOYEES SET role_id = ${roleId} WHERE id = ${employeeId};`
     db.query(sql, (err, rows) => {
         if(err){
             console.log(chalk.red(err.message));
         } else {
-            console.log("Updated Role")
+            console.log(chalk.green("Updated Role"));
+            main()
         }
     })
+
+}
+
+const employeeManagers = (employeeId, managerId) => {
+    const sql = `UPDATE EMPLOYEES SET manager_id = ${managerId} WHERE id = ${employeeId};`
+    db.query(sql, (err, rows) => {
+        if(err){
+            console.log(chalk.red(err.message));
+        } else {
+            console.log(chalk.green("Updated Manager"))
+        }
+    })
+    main()
 }
 
 
@@ -365,5 +448,4 @@ function containsAnyLetters(str) {
   }
 
 
-
-  main();
+  main()
